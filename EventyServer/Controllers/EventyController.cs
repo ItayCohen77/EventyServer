@@ -30,6 +30,7 @@ namespace EventyServer.Controllers
         public string HelloWorld()
         {
             return "Hello World";
+
         }
     } 
 }
