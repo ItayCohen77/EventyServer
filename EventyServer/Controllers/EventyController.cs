@@ -1,10 +1,15 @@
-﻿using EventyServerBL.Models;
+﻿
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+
+//Add the below
+using EventyServerBL.Models;
+using System.IO;
 
 namespace EventyServer.Controllers
 {
@@ -19,5 +24,12 @@ namespace EventyServer.Controllers
             this.context = context;
         }
         #endregion
-    }
+
+        [Route("HelloWorld")]
+        [HttpGet]
+        public string HelloWorld()
+        {
+            return "Hello World";
+        }
+    } 
 }
