@@ -161,3 +161,4 @@ ALTER TABLE
     Receipts ADD CONSTRAINT Receipts_OrderId_FK FOREIGN KEY(OrderId) REFERENCES Orders(Id);
 ALTER TABLE
     Receipts ADD CONSTRAINT Receipts_CustomerId_FK FOREIGN KEY(CustomerId) REFERENCES Users(Id);
+    
