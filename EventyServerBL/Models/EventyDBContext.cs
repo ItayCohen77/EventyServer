@@ -29,6 +29,7 @@ namespace EventyServerBL.Models
         public virtual DbSet<Review> Reviews { get; set; }
         public virtual DbSet<ReviewsMedium> ReviewsMedia { get; set; }
         public virtual DbSet<User> Users { get; set; }
+        public virtual DbSet<UserAuthToken> UserAuthTokens { get; set; }
         public virtual DbSet<Yard> Yards { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -36,7 +37,7 @@ namespace EventyServerBL.Models
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("Server=localhost\\sqlexpress;Database=EventyDB;Trusted_Connection=True;");
+                optionsBuilder.UseSqlServer("Server = localhost\\SQLEXPRESS; Database=EventyDB; Trusted_Connection=true");
             }
         }
 
@@ -46,8 +47,6 @@ namespace EventyServerBL.Models
 
             modelBuilder.Entity<Chat>(entity =>
             {
-                entity.ToTable("Chat");
-
                 entity.HasOne(d => d.Buyer)
                     .WithMany(p => p.ChatBuyers)
                     .HasForeignKey(d => d.BuyerId)
@@ -61,22 +60,9 @@ namespace EventyServerBL.Models
                     .HasConstraintName("Chat_SellerId_FK");
             });
 
-            modelBuilder.Entity<Hall>(entity =>
-            {
-                entity.ToTable("Hall");
-            });
-
             modelBuilder.Entity<Message>(entity =>
             {
-                entity.ToTable("Message");
-
-                entity.Property(e => e.MessageText)
-                    .IsRequired()
-                    .HasMaxLength(255);
-
-                entity.Property(e => e.WhenSent)
-                    .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getdate())");
+                entity.Property(e => e.WhenSent).HasDefaultValueSql("(getdate())");
 
                 entity.HasOne(d => d.Chat)
                     .WithMany(p => p.Messages)
@@ -85,28 +71,15 @@ namespace EventyServerBL.Models
                     .HasConstraintName("Message_ChatId_FK");
             });
 
-            modelBuilder.Entity<Office>(entity =>
-            {
-                entity.ToTable("Office");
-            });
-
             modelBuilder.Entity<Order>(entity =>
             {
-                entity.Property(e => e.CreatedAt)
-                    .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getdate())");
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
 
-                entity.Property(e => e.EndDateAndTime)
-                    .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getdate())");
+                entity.Property(e => e.EndDateAndTime).HasDefaultValueSql("(getdate())");
 
-                entity.Property(e => e.StartDateAndTime)
-                    .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getdate())");
+                entity.Property(e => e.StartDateAndTime).HasDefaultValueSql("(getdate())");
 
-                entity.Property(e => e.UpdatedAt)
-                    .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getdate())");
+                entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
 
                 entity.HasOne(d => d.Extra)
                     .WithMany(p => p.Orders)
@@ -127,36 +100,13 @@ namespace EventyServerBL.Models
                     .HasConstraintName("Orders_UserId_FK");
             });
 
-            modelBuilder.Entity<OrderExtra>(entity =>
-            {
-                entity.Property(e => e.ExtraType)
-                    .IsRequired()
-                    .HasMaxLength(255);
-            });
-
             modelBuilder.Entity<Place>(entity =>
             {
-                entity.ToTable("Place");
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
 
-                entity.Property(e => e.CreatedAt)
-                    .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getdate())");
+                entity.Property(e => e.PublishedAt).HasDefaultValueSql("(getdate())");
 
-                entity.Property(e => e.PlaceAddress)
-                    .IsRequired()
-                    .HasMaxLength(255);
-
-                entity.Property(e => e.PublishedAt)
-                    .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getdate())");
-
-                entity.Property(e => e.Summary)
-                    .IsRequired()
-                    .HasMaxLength(255);
-
-                entity.Property(e => e.UpdatedAt)
-                    .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getdate())");
+                entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
 
                 entity.HasOne(d => d.Owner)
                     .WithMany(p => p.Places)
@@ -167,16 +117,6 @@ namespace EventyServerBL.Models
 
             modelBuilder.Entity<PlaceMedium>(entity =>
             {
-                entity.Property(e => e.FilePath)
-                    .IsRequired()
-                    .HasMaxLength(255);
-
-                entity.Property(e => e.MimeType).HasMaxLength(255);
-
-                entity.Property(e => e.PlaceType)
-                    .IsRequired()
-                    .HasMaxLength(255);
-
                 entity.HasOne(d => d.Place)
                     .WithMany(p => p.PlaceMedia)
                     .HasForeignKey(d => d.PlaceId)
@@ -186,8 +126,6 @@ namespace EventyServerBL.Models
 
             modelBuilder.Entity<Receipt>(entity =>
             {
-                entity.Property(e => e.PaymentDate).HasColumnType("date");
-
                 entity.HasOne(d => d.Customer)
                     .WithMany(p => p.Receipts)
                     .HasForeignKey(d => d.CustomerId)
@@ -203,10 +141,6 @@ namespace EventyServerBL.Models
 
             modelBuilder.Entity<Review>(entity =>
             {
-                entity.Property(e => e.Comment)
-                    .IsRequired()
-                    .HasMaxLength(255);
-
                 entity.HasOne(d => d.Order)
                     .WithMany(p => p.Reviews)
                     .HasForeignKey(d => d.OrderId)
@@ -216,12 +150,6 @@ namespace EventyServerBL.Models
 
             modelBuilder.Entity<ReviewsMedium>(entity =>
             {
-                entity.Property(e => e.FilePath)
-                    .IsRequired()
-                    .HasMaxLength(255);
-
-                entity.Property(e => e.MimeType).HasMaxLength(255);
-
                 entity.HasOne(d => d.Review)
                     .WithMany(p => p.ReviewsMedia)
                     .HasForeignKey(d => d.ReviewId)
@@ -231,51 +159,23 @@ namespace EventyServerBL.Models
 
             modelBuilder.Entity<User>(entity =>
             {
-                entity.HasIndex(e => e.Email, "UQ__Users__A9D10534BEEB2A45")
-                    .IsUnique();
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
 
-                entity.Property(e => e.BirthDate).HasColumnType("date");
+                entity.Property(e => e.ProfileImage).HasDefaultValueSql("('default_pfp.jpg')");
 
-                entity.Property(e => e.CreatedAt)
-                    .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getdate())");
-
-                entity.Property(e => e.Email)
-                    .IsRequired()
-                    .HasMaxLength(255);
-
-                entity.Property(e => e.FirstName)
-                    .IsRequired()
-                    .HasMaxLength(255);
-
-                entity.Property(e => e.Gender)
-                    .IsRequired()
-                    .HasMaxLength(255);
-
-                entity.Property(e => e.LastName)
-                    .IsRequired()
-                    .HasMaxLength(255);
-
-                entity.Property(e => e.Pass)
-                    .IsRequired()
-                    .HasMaxLength(255);
-
-                entity.Property(e => e.PhoneNumber)
-                    .IsRequired()
-                    .HasMaxLength(255);
-
-                entity.Property(e => e.ProfileImage)
-                    .IsRequired()
-                    .HasMaxLength(255);
-
-                entity.Property(e => e.UpdatedAt)
-                    .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getdate())");
+                entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
             });
 
-            modelBuilder.Entity<Yard>(entity =>
+            modelBuilder.Entity<UserAuthToken>(entity =>
             {
-                entity.ToTable("Yard");
+                entity.HasKey(e => e.AuthToken)
+                    .HasName("PK_UserAuthToken_AuthToken");
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.UserAuthTokens)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_UserAuthToken_AccountID");
             });
 
             OnModelCreatingPartial(modelBuilder);

@@ -15,7 +15,7 @@ CREATE TABLE Users(
     UpdatedAt DATETIME NOT NULL DEFAULT GETDATE(),
     PhoneNumber NVARCHAR(255) NOT NULL,
     IsAdmin BIT NOT NULL,
-    ProfileImage NVARCHAR(255) NOT NULL
+    ProfileImage NVARCHAR(255) NOT NULL DEFAULT 'default_pfp.jpg'
 );
 
 ALTER TABLE
@@ -135,6 +135,15 @@ CREATE TABLE Office(
     HasWaterHeater BIT NOT NULL,
     HasCoffeeMachine BIT NOT NULL
 );
+
+CREATE TABLE UserAuthToken(
+    UserID INT NOT NULL,
+    AuthToken NVARCHAR(255) NOT NULL
+);
+ALTER TABLE
+    UserAuthToken ADD CONSTRAINT PK_UserAuthToken_AuthToken PRIMARY KEY(AuthToken);
+
+
 ALTER TABLE
     Office ADD CONSTRAINT Office_Id_PK PRIMARY KEY(Id);
 ALTER TABLE
@@ -161,4 +170,8 @@ ALTER TABLE
     Receipts ADD CONSTRAINT Receipts_OrderId_FK FOREIGN KEY(OrderId) REFERENCES Orders(Id);
 ALTER TABLE
     Receipts ADD CONSTRAINT Receipts_CustomerId_FK FOREIGN KEY(CustomerId) REFERENCES Users(Id);
+ALTER TABLE
+    UserAuthToken ADD CONSTRAINT FK_UserAuthToken_AccountID FOREIGN KEY(UserID) REFERENCES Users(ID);
+    
+
     
