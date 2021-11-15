@@ -26,30 +26,30 @@ namespace EventyServer.Controllers
 
         [Route("signup")]
         [HttpPost]
-        public User SignUp([FromBody] User sentAccount)
+        public User SignUp([FromBody] User sentUser)
         {
             User current = HttpContext.Session.GetObject<User>("user");
             // Check if user isn't logged in!
             if (current == null)
             {
-                User acc = new User()
+                User u = new User()
                 {
-                    Email = sentAccount.Email,
-                    Pass = sentAccount.Pass,
-                    FirstName = sentAccount.FirstName,
-                    LastName = sentAccount.LastName,
-                    BirthDate = sentAccount.BirthDate,
-                    IsAdmin = sentAccount.IsAdmin,
-                    PhoneNumber = sentAccount.PhoneNumber,
-                    ProfileImage = sentAccount.ProfileImage
+                    Email = sentUser.Email,
+                    Pass = sentUser.Pass,
+                    FirstName = sentUser.FirstName,
+                    LastName = sentUser.LastName,
+                    BirthDate = sentUser.BirthDate,
+                    IsAdmin = sentUser.IsAdmin,
+                    PhoneNumber = sentUser.PhoneNumber,
+                    ProfileImage = sentUser.ProfileImage
                 };
 
                 try
                 {
-                    bool exists = context.EmailExists(acc.Email);
+                    bool exists = context.EmailExists(u.Email);
                     if (!exists)
                     {
-                        User a = context.Register(acc);
+                        User a = context.Register(u);
                         return a;
                     }
                     Response.StatusCode = (int)System.Net.HttpStatusCode.Conflict;
@@ -59,15 +59,15 @@ namespace EventyServer.Controllers
                     Response.StatusCode = (int)System.Net.HttpStatusCode.Conflict;
                 }
 
-                if (acc != null)
+                if (u != null)
                 {
-                    HttpContext.Session.SetObject("user", acc);
+                    HttpContext.Session.SetObject("user", u);
                     Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
 
-                    return acc;
+                    return u;
                 }
                 else
-                    return null;
+                    return null;    
             }
             else
             {
@@ -191,5 +191,12 @@ namespace EventyServer.Controllers
         //        return null;
         //    }
         //}
+
+        [Route("test")]
+        [HttpGet]
+        public string HelloWorld()
+        {
+            return "Hello World";
+        }
     } 
 }

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EventyServerBL.Models
 {
-    [Index(nameof(Email), Name = "UQ__Users__A9D1053497490F4B", IsUnique = true)]
+    [Index(nameof(Email), Name = "UQ__Users__A9D1053408A58327", IsUnique = true)]
     public partial class User
     {
         public User()
@@ -29,9 +29,6 @@ namespace EventyServerBL.Models
         [Required]
         [StringLength(255)]
         public string LastName { get; set; }
-        [Required]
-        [StringLength(255)]
-        public string Gender { get; set; }
         [Column(TypeName = "date")]
         public DateTime BirthDate { get; set; }
         [Required]

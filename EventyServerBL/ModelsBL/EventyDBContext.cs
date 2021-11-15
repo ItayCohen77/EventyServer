@@ -36,7 +36,6 @@ namespace EventyServerBL.Models
                 Email = email,
                 PhoneNumber = phoneNumber,
                 Pass = password,
-                Gender = default,
                 IsAdmin = false,
                 ProfileImage = ""
             };
