@@ -77,12 +77,10 @@ namespace EventyServer.Controllers
         }
 
         [Route("login")]
-        [HttpPost]
-        public User Login([FromBody] (string, string) credentials) // credentials is a tuple where item1 is the email and item2 is the password
+        [HttpGet]
+        public User Login([FromQuery] string email, [FromQuery] string password) // credentials is a tuple where item1 is the email and item2 is the password
         {
             User user = null;
-            string email = credentials.Item1;
-            string password = credentials.Item2;
 
             bool validPassword = context.CheckPassword(password, email);
 
@@ -191,12 +189,5 @@ namespace EventyServer.Controllers
         //        return null;
         //    }
         //}
-
-        [Route("test")]
-        [HttpGet]
-        public string HelloWorld()
-        {
-            return "Hello World";
-        }
     } 
 }
