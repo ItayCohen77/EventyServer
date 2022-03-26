@@ -116,6 +116,41 @@ namespace EventyServer.Controllers
             }
         }
 
+        [Route("uploadimage")]
+        [HttpPost]
+        public async Task<IActionResult> UploadImage(IFormFile file)
+        {
+            User user = HttpContext.Session.GetObject<User>("user");
+
+            if (user != null)
+            {
+                if (file == null)
+                {
+                    return BadRequest();
+                }
+
+                try
+                {
+                    var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/imgs", file.FileName);
+                    using (var stream = new FileStream(path, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+
+                    if (file.FileName.StartsWith("a"))
+                        context.UpdateUserPfp(file.FileName, user.Id);
+
+                    return Ok(new { length = file.Length, name = file.FileName });
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                    return BadRequest();
+                }
+            }
+            return Forbid();
+        }
+
         //[Route("login-token")]
         //[HttpPost]
         //public UserDTO LoginToken([FromQuery] string token)

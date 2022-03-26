@@ -67,6 +67,19 @@ namespace EventyServerBL.Models
             return false;
         }
 
+        public bool UpdateUserPfp(string path, int id)
+        {
+            User account = this.Users.FirstOrDefault(u => u.Id == id);
+            if (account != null)
+            {
+                account.ProfileImage = path;
+                this.SaveChanges();
+                return true;
+            }
+
+            return false;
+        }
+
         //returns true of token exists in the db, otherwise false
         public bool TokenExists(string token) => this.UserAuthTokens.Any(a => a.AuthToken == token);
 
