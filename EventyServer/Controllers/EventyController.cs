@@ -151,6 +151,57 @@ namespace EventyServer.Controllers
             return Forbid();
         }
 
+        [Route("hostplace")]
+        [HttpPost]
+        public Place HostPlace([FromBody] Place sentPlace)
+        {
+            User current = HttpContext.Session.GetObject<User>("user");
+            if (current != null)
+            {
+                Place place = new Place()
+                {
+                    TotalOccupancy = sentPlace.TotalOccupancy,
+                    PlaceType = sentPlace.PlaceType,
+                    OwnerId = sentPlace.OwnerId,
+                    Summary = sentPlace.Summary,
+                    PlaceAddress = sentPlace.PlaceAddress,
+                    Apartment = sentPlace.Apartment,
+                    City = sentPlace.City,
+                    Country = sentPlace.Country,
+                    Zip = sentPlace.Zip,
+                    Price = sentPlace.Price,
+                    PlaceImage1 = sentPlace.PlaceImage1,
+                    PlaceImage2 = sentPlace.PlaceImage2,
+                    PlaceImage3 = sentPlace.PlaceImage3,
+                    PlaceImage4 = sentPlace.PlaceImage4,
+                    PlaceImage5 = sentPlace.PlaceImage5,
+                    PlaceImage6 = sentPlace.PlaceImage6,
+                };
+
+                try
+                {
+                    Place p = context.UploadPlace(place);
+                    if (p != null)
+                    {
+                        Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
+                        return p;
+                    }
+                    Response.StatusCode = (int)System.Net.HttpStatusCode.Conflict;
+                    return null;
+                }
+                catch
+                {
+                    Response.StatusCode = (int)System.Net.HttpStatusCode.Conflict;
+                }
+                return null;
+            }
+            else
+            {
+                Response.StatusCode = (int)System.Net.HttpStatusCode.Forbidden;
+                return null;
+            }
+        }
+
         //[Route("login-token")]
         //[HttpPost]
         //public UserDTO LoginToken([FromQuery] string token)

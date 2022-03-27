@@ -8,15 +8,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EventyServerBL.Models
 {
-    [Table("Yard")]
-    public partial class Yard
+    [Table("HouseBackyard")]
+    public partial class HouseBackyard
     {
         [Key]
         public int Id { get; set; }
         public bool HasPool { get; set; }
         public bool HasBbq { get; set; }
-        public bool HasGras { get; set; }
-        public bool HasTable { get; set; }
+        public bool HasHotub { get; set; }
+        public bool HasTables { get; set; }
         public bool HasChairs { get; set; }
     }
 }

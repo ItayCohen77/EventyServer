@@ -17,20 +17,21 @@ namespace EventyServerBL.Models
         {
         }
 
+        public virtual DbSet<Apartment> Apartments { get; set; }
         public virtual DbSet<Chat> Chats { get; set; }
         public virtual DbSet<Hall> Halls { get; set; }
+        public virtual DbSet<HouseBackyard> HouseBackyards { get; set; }
         public virtual DbSet<Message> Messages { get; set; }
-        public virtual DbSet<Office> Offices { get; set; }
         public virtual DbSet<Order> Orders { get; set; }
         public virtual DbSet<OrderExtra> OrderExtras { get; set; }
         public virtual DbSet<Place> Places { get; set; }
         public virtual DbSet<PlaceMedium> PlaceMedia { get; set; }
+        public virtual DbSet<PrivateHouse> PrivateHouses { get; set; }
         public virtual DbSet<Receipt> Receipts { get; set; }
         public virtual DbSet<Review> Reviews { get; set; }
         public virtual DbSet<ReviewsMedium> ReviewsMedia { get; set; }
         public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<UserAuthToken> UserAuthTokens { get; set; }
-        public virtual DbSet<Yard> Yards { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -43,7 +44,7 @@ namespace EventyServerBL.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.HasAnnotation("Relational:Collation", "Hebrew_CI_AS");
+            modelBuilder.HasAnnotation("Relational:Collation", "SQL_Latin1_General_CP1_CI_AS");
 
             modelBuilder.Entity<Chat>(entity =>
             {
@@ -103,6 +104,18 @@ namespace EventyServerBL.Models
             modelBuilder.Entity<Place>(entity =>
             {
                 entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+
+                entity.Property(e => e.PlaceImage1).HasDefaultValueSql("('default_pl.jpg')");
+
+                entity.Property(e => e.PlaceImage2).HasDefaultValueSql("('default_pl.jpg')");
+
+                entity.Property(e => e.PlaceImage3).HasDefaultValueSql("('default_pl.jpg')");
+
+                entity.Property(e => e.PlaceImage4).HasDefaultValueSql("('default_pl.jpg')");
+
+                entity.Property(e => e.PlaceImage5).HasDefaultValueSql("('default_pl.jpg')");
+
+                entity.Property(e => e.PlaceImage6).HasDefaultValueSql("('default_pl.jpg')");
 
                 entity.Property(e => e.PublishedAt).HasDefaultValueSql("(getdate())");
 

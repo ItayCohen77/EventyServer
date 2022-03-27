@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EventyServerBL.Models
 {
-    [Index(nameof(Email), Name = "UQ__Users__A9D1053408A58327", IsUnique = true)]
+    [Index(nameof(Email), Name = "UQ__Users__A9D10534E1648A38", IsUnique = true)]
     public partial class User
     {
         public User()

@@ -22,13 +22,23 @@ ALTER TABLE
 
 CREATE TABLE Place(
     Id INT NOT NULL IDENTITY(10000, 1),
+    OwnerId INT NOT NULL,
     PlaceType INT NOT NULL,
     TotalOccupancy INT NOT NULL,
     Summary NVARCHAR(255) NOT NULL,
     PlaceAddress NVARCHAR(255) NOT NULL,
+    Apartment INT NOT NULL,
+    City NVARCHAR(255) NOT NULL,
+    Zip INT NOT NULL,
+    Country NVARCHAR(255) NOT NULL,
     Price INT NOT NULL,
+    PlaceImage1 NVARCHAR(255) NOT NULL DEFAULT 'default_pl.jpg',
+    PlaceImage2 NVARCHAR(255) NOT NULL DEFAULT 'default_pl.jpg',
+    PlaceImage3 NVARCHAR(255) NOT NULL DEFAULT 'default_pl.jpg',
+    PlaceImage4 NVARCHAR(255) NOT NULL DEFAULT 'default_pl.jpg',
+    PlaceImage5 NVARCHAR(255) NOT NULL DEFAULT 'default_pl.jpg',
+    PlaceImage6 NVARCHAR(255) NOT NULL DEFAULT 'default_pl.jpg',  
     PublishedAt DATETIME NOT NULL DEFAULT GETDATE(),
-    OwnerId INT NOT NULL,
     CreatedAt DATETIME NOT NULL DEFAULT GETDATE(),
     UpdatedAt DATETIME NOT NULL DEFAULT GETDATE()
 );
@@ -107,34 +117,46 @@ CREATE TABLE Receipts(
 );
 ALTER TABLE
     Receipts ADD CONSTRAINT Receipts_Id_PK PRIMARY KEY(Id);
-CREATE TABLE Yard(
+CREATE TABLE HouseBackyard(
     Id INT NOT NULL IDENTITY(10000, 1),
     HasPool BIT NOT NULL,
     HasBbq BIT NOT NULL,
-    HasGras BIT NOT NULL,
-    HasTable BIT NOT NULL,
+    HasHotub BIT NOT NULL,
+    HasTables BIT NOT NULL,
     HasChairs BIT NOT NULL
 );
 ALTER TABLE
-    Yard ADD CONSTRAINT Yard_Id_PK PRIMARY KEY(Id);
+    HouseBackyard ADD CONSTRAINT HouseBackyard_Id_PK PRIMARY KEY(Id);
 CREATE TABLE Hall(
     Id INT NOT NULL IDENTITY(10000, 1),
+    HasTables BIT NOT NULL,
     HasChairs BIT NOT NULL,
-    HasTable BIT NOT NULL,
+    HasSpeakerAndMic BIT NOT NULL,
     HasProjector BIT NOT NULL,
-    HasScreen BIT NOT NULL
+    HasBar BIT NOT NULL
 );
 ALTER TABLE
     Hall ADD CONSTRAINT Hall_Id_PK PRIMARY KEY(Id);
-CREATE TABLE Office(
+CREATE TABLE PrivateHouse(
     Id INT NOT NULL IDENTITY(10000, 1),
-    HasAc BIT NOT NULL,
-    HasComputer BIT NOT NULL,
+    HasSpeakerAndMic BIT NOT NULL,
+    HasAirConditioner BIT NOT NULL,
     HasTv BIT NOT NULL,
     HasWaterHeater BIT NOT NULL,
     HasCoffeeMachine BIT NOT NULL
 );
-
+ALTER TABLE
+    PrivateHouse ADD CONSTRAINT PrivateHouse_Id_PK PRIMARY KEY(Id);
+CREATE TABLE Apartment(
+    Id INT NOT NULL IDENTITY(10000, 1),
+    HasSpeakerAndMic BIT NOT NULL,
+    HasAirConditioner BIT NOT NULL,
+    HasTv BIT NOT NULL,
+    HasWaterHeater BIT NOT NULL,
+    HasCoffeeMachine BIT NOT NULL
+);
+ALTER TABLE
+    Apartment ADD CONSTRAINT Apartment_Id_PK PRIMARY KEY(Id);
 CREATE TABLE UserAuthToken(
     UserID INT NOT NULL,
     AuthToken NVARCHAR(255) NOT NULL
@@ -143,8 +165,7 @@ ALTER TABLE
     UserAuthToken ADD CONSTRAINT PK_UserAuthToken_AuthToken PRIMARY KEY(AuthToken);
 
 
-ALTER TABLE
-    Office ADD CONSTRAINT Office_Id_PK PRIMARY KEY(Id);
+
 ALTER TABLE
     Orders ADD CONSTRAINT Orders_UserId_FK FOREIGN KEY(UserId) REFERENCES Users(Id);
 ALTER TABLE
@@ -172,5 +193,8 @@ ALTER TABLE
 ALTER TABLE
     UserAuthToken ADD CONSTRAINT FK_UserAuthToken_AccountID FOREIGN KEY(UserID) REFERENCES Users(ID);
     
+
+    
+ 
 
     

@@ -26,6 +26,21 @@ namespace EventyServerBL.Models
         }
 
         // receives the needed info to create an account, creates the object and registers it. Returns the Account object.
+        public Place UploadPlace(Place p)
+        {
+            try
+            {
+                this.Places.Add(p);
+                this.SaveChanges();
+
+                return p;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         public User Register(string firstName, string lastName, DateTime birthDate, string email, string phoneNumber, string password)
         {
             User a = new User()
