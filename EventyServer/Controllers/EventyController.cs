@@ -50,24 +50,17 @@ namespace EventyServer.Controllers
                     if (!exists)
                     {
                         User a = context.Register(u);
+                        HttpContext.Session.SetObject("user", u);
                         return a;
                     }
                     Response.StatusCode = (int)System.Net.HttpStatusCode.Conflict;
+                    return null;
                 }
                 catch
                 {
                     Response.StatusCode = (int)System.Net.HttpStatusCode.Conflict;
-                }
-
-                if (u != null)
-                {
-                    HttpContext.Session.SetObject("user", u);
-                    Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
-
-                    return u;
-                }
-                else
-                    return null;    
+                    return null;
+                }  
             }
             else
             {
@@ -113,6 +106,22 @@ namespace EventyServer.Controllers
             {
                 Response.StatusCode = (int)System.Net.HttpStatusCode.Unauthorized;
                 return null;
+            }
+        }
+
+        [Route("logout")]
+        [HttpGet]
+        public IActionResult LogOut()
+        {
+            User user = HttpContext.Session.GetObject<User>("user");
+            if (user != null)
+            {
+                HttpContext.Session.Clear();
+                return Ok();
+            }
+            else
+            {
+                return Forbid();
             }
         }
 
