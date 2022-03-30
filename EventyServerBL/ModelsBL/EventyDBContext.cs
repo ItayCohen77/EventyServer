@@ -98,6 +98,8 @@ namespace EventyServerBL.Models
         //returns true of token exists in the db, otherwise false
         public bool TokenExists(string token) => this.UserAuthTokens.Any(a => a.AuthToken == token);
 
+        public List<Place> GetPlaces() => this.Places.ToList();
+
         //adds token to db and returns true if it succeeded
         public bool AddToken(string token, int id)
         {

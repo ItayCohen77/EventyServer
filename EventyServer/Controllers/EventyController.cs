@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Microsoft.EntityFrameworkCore;
 
 //Add the below
@@ -71,7 +72,7 @@ namespace EventyServer.Controllers
 
         [Route("login")]
         [HttpGet]
-        public User Login([FromQuery] string email, [FromQuery] string password) // credentials is a tuple where item1 is the email and item2 is the password
+        public User Login([FromQuery] string email, [FromQuery] string password)
         {
             User user = null;
 
@@ -207,6 +208,31 @@ namespace EventyServer.Controllers
             else
             {
                 Response.StatusCode = (int)System.Net.HttpStatusCode.Forbidden;
+                return null;
+            }
+        }
+
+        [Route("getallplaces")]
+        [HttpGet]
+        public string GetAllPlaces() 
+        {
+            try
+            {
+                List<Place> places = context.GetPlaces();
+
+                JsonSerializerSettings options = new JsonSerializerSettings
+                {
+                    PreserveReferencesHandling = PreserveReferencesHandling.All
+                };
+
+                string json = JsonConvert.SerializeObject(places, options);
+
+                Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
+                return json;
+            }
+            catch
+            {
+                Response.StatusCode = (int)System.Net.HttpStatusCode.InternalServerError;
                 return null;
             }
         }
