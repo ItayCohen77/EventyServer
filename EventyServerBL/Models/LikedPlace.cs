@@ -8,17 +8,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EventyServerBL.Models
 {
-    [Table("UserAuthToken")]
-    public partial class UserAuthToken
+    public partial class LikedPlace
     {
+        [Key]
         [Column("UserID")]
         public int UserId { get; set; }
         [Key]
-        [StringLength(255)]
-        public string AuthToken { get; set; }
+        [Column("PlaceID")]
+        public int PlaceId { get; set; }
 
         [ForeignKey(nameof(UserId))]
-        [InverseProperty("UserAuthTokens")]
+        [InverseProperty("LikedPlaces")]
         public virtual User User { get; set; }
     }
 }

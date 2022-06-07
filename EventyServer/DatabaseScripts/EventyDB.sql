@@ -192,6 +192,8 @@ ALTER TABLE
     Receipts ADD CONSTRAINT Receipts_CustomerId_FK FOREIGN KEY(CustomerId) REFERENCES Users(Id);
 ALTER TABLE
     UserAuthToken ADD CONSTRAINT FK_UserAuthToken_AccountID FOREIGN KEY(UserID) REFERENCES Users(ID);
+ALTER TABLE
+    Place ADD CONSTRAINT Place_PlaceType_FK FOREIGN KEY(PlaceType) REFERENCES PlaceType(PlaceTypeID);
     
 
     

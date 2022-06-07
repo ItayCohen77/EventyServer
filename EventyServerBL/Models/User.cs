@@ -8,17 +8,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EventyServerBL.Models
 {
-    [Index(nameof(Email), Name = "UQ__Users__A9D10534E1648A38", IsUnique = true)]
+    [Index(nameof(Email), Name = "UQ__Users__A9D105341DC2FE54", IsUnique = true)]
     public partial class User
     {
         public User()
         {
-            ChatBuyers = new HashSet<Chat>();
-            ChatSellers = new HashSet<Chat>();
+            LikedPlaces = new HashSet<LikedPlace>();
             Orders = new HashSet<Order>();
             Places = new HashSet<Place>();
-            Receipts = new HashSet<Receipt>();
-            UserAuthTokens = new HashSet<UserAuthToken>();
         }
 
         [Key]
@@ -49,17 +46,11 @@ namespace EventyServerBL.Models
         [StringLength(255)]
         public string ProfileImage { get; set; }
 
-        [InverseProperty(nameof(Chat.Buyer))]
-        public virtual ICollection<Chat> ChatBuyers { get; set; }
-        [InverseProperty(nameof(Chat.Seller))]
-        public virtual ICollection<Chat> ChatSellers { get; set; }
+        [InverseProperty(nameof(LikedPlace.User))]
+        public virtual ICollection<LikedPlace> LikedPlaces { get; set; }
         [InverseProperty(nameof(Order.User))]
         public virtual ICollection<Order> Orders { get; set; }
         [InverseProperty(nameof(Place.Owner))]
         public virtual ICollection<Place> Places { get; set; }
-        [InverseProperty(nameof(Receipt.Customer))]
-        public virtual ICollection<Receipt> Receipts { get; set; }
-        [InverseProperty(nameof(UserAuthToken.User))]
-        public virtual ICollection<UserAuthToken> UserAuthTokens { get; set; }
     }
 }

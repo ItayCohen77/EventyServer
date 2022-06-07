@@ -14,7 +14,6 @@ namespace EventyServerBL.Models
         public Place()
         {
             Orders = new HashSet<Order>();
-            PlaceMedia = new HashSet<PlaceMedium>();
         }
 
         [Key]
@@ -28,10 +27,14 @@ namespace EventyServerBL.Models
         [Required]
         [StringLength(255)]
         public string PlaceAddress { get; set; }
+        [Required]
+        [StringLength(255)]
         public string Apartment { get; set; }
         [Required]
         [StringLength(255)]
         public string City { get; set; }
+        [Required]
+        [StringLength(255)]
         public string Zip { get; set; }
         [Required]
         [StringLength(255)]
@@ -65,9 +68,10 @@ namespace EventyServerBL.Models
         [ForeignKey(nameof(OwnerId))]
         [InverseProperty(nameof(User.Places))]
         public virtual User Owner { get; set; }
+        [ForeignKey(nameof(PlaceType))]
+        [InverseProperty("Places")]
+        public virtual PlaceType PlaceTypeNavigation { get; set; }
         [InverseProperty(nameof(Order.Place))]
         public virtual ICollection<Order> Orders { get; set; }
-        [InverseProperty(nameof(PlaceMedium.Place))]
-        public virtual ICollection<PlaceMedium> PlaceMedia { get; set; }
     }
 }

@@ -18,20 +18,14 @@ namespace EventyServerBL.Models
         }
 
         public virtual DbSet<Apartment> Apartments { get; set; }
-        public virtual DbSet<Chat> Chats { get; set; }
         public virtual DbSet<Hall> Halls { get; set; }
         public virtual DbSet<HouseBackyard> HouseBackyards { get; set; }
-        public virtual DbSet<Message> Messages { get; set; }
+        public virtual DbSet<LikedPlace> LikedPlaces { get; set; }
         public virtual DbSet<Order> Orders { get; set; }
-        public virtual DbSet<OrderExtra> OrderExtras { get; set; }
         public virtual DbSet<Place> Places { get; set; }
-        public virtual DbSet<PlaceMedium> PlaceMedia { get; set; }
+        public virtual DbSet<PlaceType> PlaceTypes { get; set; }
         public virtual DbSet<PrivateHouse> PrivateHouses { get; set; }
-        public virtual DbSet<Receipt> Receipts { get; set; }
-        public virtual DbSet<Review> Reviews { get; set; }
-        public virtual DbSet<ReviewsMedium> ReviewsMedia { get; set; }
         public virtual DbSet<User> Users { get; set; }
-        public virtual DbSet<UserAuthToken> UserAuthTokens { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -46,47 +40,23 @@ namespace EventyServerBL.Models
         {
             modelBuilder.HasAnnotation("Relational:Collation", "SQL_Latin1_General_CP1_CI_AS");
 
-            modelBuilder.Entity<Chat>(entity =>
+            modelBuilder.Entity<LikedPlace>(entity =>
             {
-                entity.HasOne(d => d.Buyer)
-                    .WithMany(p => p.ChatBuyers)
-                    .HasForeignKey(d => d.BuyerId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("Chat_BuyerId_FK");
+                entity.HasKey(e => new { e.UserId, e.PlaceId })
+                    .HasName("PK_LikedPlaces_UserID_PlaceID");
 
-                entity.HasOne(d => d.Seller)
-                    .WithMany(p => p.ChatSellers)
-                    .HasForeignKey(d => d.SellerId)
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.LikedPlaces)
+                    .HasForeignKey(d => d.UserId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("Chat_SellerId_FK");
-            });
-
-            modelBuilder.Entity<Message>(entity =>
-            {
-                entity.Property(e => e.WhenSent).HasDefaultValueSql("(getdate())");
-
-                entity.HasOne(d => d.Chat)
-                    .WithMany(p => p.Messages)
-                    .HasForeignKey(d => d.ChatId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("Message_ChatId_FK");
+                    .HasConstraintName("FK_LikedPlaces_UserID");
             });
 
             modelBuilder.Entity<Order>(entity =>
             {
                 entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
 
-                entity.Property(e => e.EndDateAndTime).HasDefaultValueSql("(getdate())");
-
-                entity.Property(e => e.StartDateAndTime).HasDefaultValueSql("(getdate())");
-
                 entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
-
-                entity.HasOne(d => d.Extra)
-                    .WithMany(p => p.Orders)
-                    .HasForeignKey(d => d.ExtraId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("Orders_ExtraId_FK");
 
                 entity.HasOne(d => d.Place)
                     .WithMany(p => p.Orders)
@@ -126,48 +96,12 @@ namespace EventyServerBL.Models
                     .HasForeignKey(d => d.OwnerId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("Place_OwnerId_FK");
-            });
 
-            modelBuilder.Entity<PlaceMedium>(entity =>
-            {
-                entity.HasOne(d => d.Place)
-                    .WithMany(p => p.PlaceMedia)
-                    .HasForeignKey(d => d.PlaceId)
+                entity.HasOne(d => d.PlaceTypeNavigation)
+                    .WithMany(p => p.Places)
+                    .HasForeignKey(d => d.PlaceType)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("PlaceMedia_PlaceId_FK");
-            });
-
-            modelBuilder.Entity<Receipt>(entity =>
-            {
-                entity.HasOne(d => d.Customer)
-                    .WithMany(p => p.Receipts)
-                    .HasForeignKey(d => d.CustomerId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("Receipts_CustomerId_FK");
-
-                entity.HasOne(d => d.Order)
-                    .WithMany(p => p.Receipts)
-                    .HasForeignKey(d => d.OrderId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("Receipts_OrderId_FK");
-            });
-
-            modelBuilder.Entity<Review>(entity =>
-            {
-                entity.HasOne(d => d.Order)
-                    .WithMany(p => p.Reviews)
-                    .HasForeignKey(d => d.OrderId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("Reviews_OrderId_FK");
-            });
-
-            modelBuilder.Entity<ReviewsMedium>(entity =>
-            {
-                entity.HasOne(d => d.Review)
-                    .WithMany(p => p.ReviewsMedia)
-                    .HasForeignKey(d => d.ReviewId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("ReviewsMedia_ReviewId_FK");
+                    .HasConstraintName("Place_PlaceType_FK");
             });
 
             modelBuilder.Entity<User>(entity =>
@@ -177,18 +111,6 @@ namespace EventyServerBL.Models
                 entity.Property(e => e.ProfileImage).HasDefaultValueSql("('default_pfp.jpg')");
 
                 entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
-            });
-
-            modelBuilder.Entity<UserAuthToken>(entity =>
-            {
-                entity.HasKey(e => e.AuthToken)
-                    .HasName("PK_UserAuthToken_AuthToken");
-
-                entity.HasOne(d => d.User)
-                    .WithMany(p => p.UserAuthTokens)
-                    .HasForeignKey(d => d.UserId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_UserAuthToken_AccountID");
             });
 
             OnModelCreatingPartial(modelBuilder);

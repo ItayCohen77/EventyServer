@@ -13,6 +13,7 @@ namespace EventyServerBL.Models
     {
         [Key]
         public int Id { get; set; }
+        public int PlaceId { get; set; }
         public bool HasTables { get; set; }
         public bool HasChairs { get; set; }
         public bool HasSpeakerAndMic { get; set; }

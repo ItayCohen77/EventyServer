@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 
 namespace EventyServerBL.Models
@@ -26,12 +27,42 @@ namespace EventyServerBL.Models
         }
 
         // receives the needed info to create an account, creates the object and registers it. Returns the Account object.
-        public Place UploadPlace(Place p)
+        public Place UploadPlace(PlaceObj placeObj)
         {
             try
             {
+                Place p = placeObj.placeObj;
                 this.Places.Add(p);
                 this.SaveChanges();
+
+                if(placeObj.apartmentObj != null)
+                {
+                    Apartment a = placeObj.apartmentObj;
+                    a.PlaceId = p.Id;
+                    this.Apartments.Add(a);
+                    this.SaveChanges();
+                }
+                else if (placeObj.privateHouseObj != null)
+                {
+                    PrivateHouse ph = placeObj.privateHouseObj;
+                    ph.PlaceId = p.Id;
+                    this.PrivateHouses.Add(ph);
+                    this.SaveChanges();
+                }
+                else if (placeObj.hallObj != null)
+                {
+                    Hall hall = placeObj.hallObj;
+                    hall.PlaceId = p.Id;
+                    this.Halls.Add(hall);
+                    this.SaveChanges();
+                }
+                else
+                {
+                    HouseBackyard hb = placeObj.houseBackyardObj;
+                    hb.PlaceId = p.Id;
+                    this.HouseBackyards.Add(hb);
+                    this.SaveChanges();
+                }
 
                 return p;
             }
@@ -59,16 +90,7 @@ namespace EventyServerBL.Models
         }
 
         // returns the accounts if correct credentials, else returns null
-        public User Login(string email, string password) => this.Users.FirstOrDefault(a => a.Email == email && a.Pass == password);
-
-        //log in using token
-        public User Login(string token)
-        {
-            UserAuthToken u = this.UserAuthTokens.FirstOrDefault(a => a.AuthToken == token);
-            if (u != null)
-                return u.User;
-            return null;
-        }
+        public User Login(string email, string password) => this.Users.Include(l => l.LikedPlaces).FirstOrDefault(a => a.Email == email && a.Pass == password);
 
         // returns true if email exists otherwise returns false
         public bool EmailExists(string email) => this.Users.Any(a => a.Email == email);
@@ -95,29 +117,96 @@ namespace EventyServerBL.Models
             return false;
         }
 
-        //returns true of token exists in the db, otherwise false
-        public bool TokenExists(string token) => this.UserAuthTokens.Any(a => a.AuthToken == token);
-
         public List<Place> GetPlaces() => this.Places.ToList();
 
-        //adds token to db and returns true if it succeeded
-        public bool AddToken(string token, int id)
+        public List<Place> GetPlacesByCity(string city) => this.Places.Where(s => s.City.ToLower() == city).Include(s => s.PlaceTypeNavigation).Include(s => s.Orders).ToList();
+        public Place GetPlacesById(int placeId) => this.Places.Include(s => s.PlaceTypeNavigation).FirstOrDefault(s => s.Id == placeId);
+        public bool AddLikedPlace(int userID, int placeId)
         {
-            try
+            User user = this.Users.FirstOrDefault(u => u.Id == userID);
+            if (user != null)
             {
-                this.UserAuthTokens.Add(new UserAuthToken()
+                user.LikedPlaces.Add(new LikedPlace()
                 {
-                    UserId = id,
-                    AuthToken = token
+                    UserId = userID,
+                    PlaceId = placeId
                 });
                 this.SaveChanges();
-
                 return true;
             }
-            catch
+            else
             {
                 return false;
             }
         }
+
+        public bool RemoveLikedPlace(int userID, int placeId)
+        {
+            User user = this.Users.Include(l => l.LikedPlaces).FirstOrDefault(u => u.Id == userID);
+            if (user != null)
+            {
+                LikedPlace likedPlace = user.LikedPlaces.FirstOrDefault(p => p.PlaceId == placeId);
+
+                if (likedPlace != null)
+                {
+                    user.LikedPlaces.Remove(likedPlace);
+                    this.SaveChanges();
+                    return true;
+                }
+
+                return false;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public List<Place> GetLikedPlaces(int userID)
+        {
+            User user = this.Users.Include(l => l.LikedPlaces).FirstOrDefault(u => u.Id == userID);
+            if (user != null)
+            {
+                List<LikedPlace> like = user.LikedPlaces.ToList();
+                List<Place> likedPlaces = new List<Place>();
+
+                foreach (LikedPlace liked in like)
+                {
+                    likedPlaces.Add(this.Places.Include(s => s.PlaceTypeNavigation).FirstOrDefault(p => p.Id == liked.PlaceId));
+                }             
+
+                if (likedPlaces != null)
+                { 
+                    return likedPlaces;
+                }
+
+                return null;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public Apartment GetApartmentList(int placeId) => this.Apartments.Where(a => a.PlaceId == placeId).FirstOrDefault();
+        public PrivateHouse GetPrivateHouseList(int placeId) => this.PrivateHouses.Where(p => p.PlaceId == placeId).FirstOrDefault();
+        public HouseBackyard GetHouseBackyardList(int placeId) => this.HouseBackyards.Where(h => h.PlaceId == placeId).FirstOrDefault();
+        public Hall GetHallList(int placeId) => this.Halls.Where(h => h.PlaceId == placeId).FirstOrDefault();
+        public Order MakeOrder(Order o)
+        {
+            try
+            {
+                this.Orders.Add(o);
+                this.SaveChanges();
+
+                return o;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+        public List<Order> GetOrders(int userId) => this.Orders.Where(o => o.UserId == userId).Include(s => s.Place).ToList();
+        public List<Place> GetEstates(int userId) => this.Places.Where(p => p.OwnerId == userId).Include(s => s.PlaceTypeNavigation).ToList();
     }
 }

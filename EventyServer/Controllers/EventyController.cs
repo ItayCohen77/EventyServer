@@ -110,6 +110,23 @@ namespace EventyServer.Controllers
             }
         }
 
+        [Route("email-exists")]
+        [HttpGet]
+        public bool? EmailExists([FromQuery] string email)
+        {
+            try
+            {
+                bool exists = context.EmailExists(email);
+                Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
+                return exists;
+            }
+            catch
+            {
+                Response.StatusCode = (int)System.Net.HttpStatusCode.InternalServerError;
+                return null;
+            }
+        }
+
         [Route("logout")]
         [HttpGet]
         public IActionResult LogOut()
@@ -163,34 +180,24 @@ namespace EventyServer.Controllers
 
         [Route("hostplace")]
         [HttpPost]
-        public Place HostPlace([FromBody] Place sentPlace)
+        public Place HostPlace([FromBody] PlaceObj sentPlaceObj)
         {
+
             User current = HttpContext.Session.GetObject<User>("user");
             if (current != null)
             {
-                Place place = new Place()
+                PlaceObj placeObj = new PlaceObj()
                 {
-                    TotalOccupancy = sentPlace.TotalOccupancy,
-                    PlaceType = sentPlace.PlaceType,
-                    OwnerId = sentPlace.OwnerId,
-                    Summary = sentPlace.Summary,
-                    PlaceAddress = sentPlace.PlaceAddress,
-                    Apartment = sentPlace.Apartment,
-                    City = sentPlace.City,
-                    Country = sentPlace.Country,
-                    Zip = sentPlace.Zip,
-                    Price = sentPlace.Price,
-                    PlaceImage1 = sentPlace.PlaceImage1,
-                    PlaceImage2 = sentPlace.PlaceImage2,
-                    PlaceImage3 = sentPlace.PlaceImage3,
-                    PlaceImage4 = sentPlace.PlaceImage4,
-                    PlaceImage5 = sentPlace.PlaceImage5,
-                    PlaceImage6 = sentPlace.PlaceImage6,
-                };
+                    placeObj = sentPlaceObj.placeObj,
+                    apartmentObj = sentPlaceObj.apartmentObj,
+                    privateHouseObj = sentPlaceObj.privateHouseObj,
+                    hallObj = sentPlaceObj.hallObj,
+                    houseBackyardObj = sentPlaceObj.houseBackyardObj,
+                };               
 
                 try
                 {
-                    Place p = context.UploadPlace(place);
+                    Place p = context.UploadPlace(placeObj);
                     if (p != null)
                     {
                         Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
@@ -212,7 +219,7 @@ namespace EventyServer.Controllers
             }
         }
 
-        [Route("getallplaces")]
+        [Route("getplaces")]
         [HttpGet]
         public string GetAllPlaces() 
         {
@@ -237,78 +244,468 @@ namespace EventyServer.Controllers
             }
         }
 
-        //[Route("login-token")]
-        //[HttpPost]
-        //public UserDTO LoginToken([FromQuery] string token)
-        //{
-        //    Account account = null;
-        //    try
-        //    {
-        //        account = context.Login(token);
-        //    }
-        //    catch
-        //    {
-        //        Response.StatusCode = (int)System.Net.HttpStatusCode.InternalServerError;
-        //    }
+        [Route("getplacesbycity")]
+        [HttpGet]
+        public string GetPlacesByCity([FromQuery] string city)
+        {
+            try
+            {
+                List<Place> places = context.GetPlacesByCity(city);
 
-        //    // Check username and password
-        //    if (account != null)
-        //    {
-        //        AccountDTO aDTO = new AccountDTO(account);
+                JsonSerializerSettings options = new JsonSerializerSettings
+                {
+                    PreserveReferencesHandling = PreserveReferencesHandling.All
+                };
 
-        //        HttpContext.Session.SetObject("player", aDTO);
-        //        Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
+                string json = JsonConvert.SerializeObject(places, options);
 
-        //        return aDTO;
-        //    }
-        //    else
-        //    {
-        //        Response.StatusCode = (int)System.Net.HttpStatusCode.Forbidden;
-        //        return null;
-        //    }
-        //}
+                Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
+                return json;
+            }
+            catch
+            {
+                Response.StatusCode = (int)System.Net.HttpStatusCode.InternalServerError;
+                return null;
+            }
+        }
 
-        //[Route("generate-token")]
-        //[HttpGet]
-        //public string GenerateToken()
-        //{
-        //    try
-        //    {
-        //        AccountDTO current = HttpContext.Session.GetObject<AccountDTO>("account");
-        //        if (current != null)
-        //        {
-        //            bool isUnique = false;
-        //            string token = "";
-        //            while (!isUnique)
-        //            {
-        //                token = GeneralProcessing.GenerateAlphanumerical(16);
-        //                isUnique = context.TokenExists(token);
-        //            }
+        [Route("getplacebyid")]
+        [HttpGet]
+        public string GetPlaceById([FromQuery] int placeId)
+        {
+            try
+            {
+                Place place = context.GetPlacesById(placeId);
 
-        //            bool worked = context.AddToken(token, current.AccountId);
-        //            if (worked)
-        //            {
-        //                Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
-        //                return token;
-        //            }
-        //            else
-        //            {
-        //                Response.StatusCode = (int)System.Net.HttpStatusCode.InternalServerError;
-        //                return null;
-        //            }
+                JsonSerializerSettings options = new JsonSerializerSettings
+                {
+                    PreserveReferencesHandling = PreserveReferencesHandling.All
+                };
 
-        //        }
-        //        else
-        //        {
-        //            Response.StatusCode = (int)System.Net.HttpStatusCode.Forbidden;
-        //            return null;
-        //        }
-        //    }
-        //    catch
-        //    {
-        //        Response.StatusCode = (int)System.Net.HttpStatusCode.InternalServerError;
-        //        return null;
-        //    }
-        //}
-    } 
+                string json = JsonConvert.SerializeObject(place, options);
+
+                Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
+                return json;
+            }
+            catch
+            {
+                Response.StatusCode = (int)System.Net.HttpStatusCode.InternalServerError;
+                return null;
+            }
+        }
+
+        [Route("addlikedplace")]
+        [HttpGet]
+        public bool AddLikedPlace([FromQuery] int placeID)
+        {
+            User current = HttpContext.Session.GetObject<User>("user");
+            if (current != null)
+            {
+                try
+                {
+                    bool added = context.AddLikedPlace(current.Id, placeID);
+                    Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
+                    return added;
+                }
+                catch
+                {
+                    Response.StatusCode = (int)System.Net.HttpStatusCode.InternalServerError;
+                    return false;
+                }
+            }
+            else
+            {
+                Response.StatusCode = (int)System.Net.HttpStatusCode.Forbidden;
+                return false;
+            }
+        }
+
+        [Route("removelikedplace")]
+        [HttpGet]
+        public bool RemoveLikedPlace([FromQuery] int placeID)
+        {
+            User current = HttpContext.Session.GetObject<User>("user");
+            if (current != null)
+            {
+                try
+                {
+                    bool added = context.RemoveLikedPlace(current.Id, placeID);
+                    Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
+                    return added;
+                }
+                catch
+                {
+                    Response.StatusCode = (int)System.Net.HttpStatusCode.InternalServerError;
+                    return false;
+                }
+            }
+            else
+            {
+                Response.StatusCode = (int)System.Net.HttpStatusCode.Forbidden;
+                return false;
+            }
+        }
+
+        [Route("getlikedplaces")]
+        [HttpGet]
+        public string GetLikedPlaces([FromQuery] int userID)
+        {
+            try
+            {
+                List<Place> places = context.GetLikedPlaces(userID);
+
+                JsonSerializerSettings options = new JsonSerializerSettings
+                {
+                    PreserveReferencesHandling = PreserveReferencesHandling.All
+                };
+
+                string json = JsonConvert.SerializeObject(places, options);
+
+                Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
+                return json;
+            }
+            catch
+            {
+                Response.StatusCode = (int)System.Net.HttpStatusCode.InternalServerError;
+                return null;
+            }
+        }
+
+        [Route("getfeatureslist")]
+        [HttpGet]
+        public List<Feature> GetFeaturesList([FromQuery] int placeId, [FromQuery] string placeT)
+        {                    
+            try
+            {
+                string placeType = placeT;
+                List<Feature> features = new List<Feature>();
+                Apartment a = new Apartment();
+                PrivateHouse ph = new PrivateHouse();
+                HouseBackyard hb = new HouseBackyard();
+                Hall h = new Hall();
+
+                switch(placeType)
+                {
+                    case "Apartment":
+                        a = context.GetApartmentList(placeId);
+                        break;
+                    case "PrivateHouse":
+                        ph = context.GetPrivateHouseList(placeId);
+                        break;
+                    case "HouseBackyard":
+                        hb = context.GetHouseBackyardList(placeId);
+                        break;
+                    case "Hall":
+                        h = context.GetHallList(placeId);
+                        break;
+                }
+
+                if(a.PlaceId != 0)
+                {
+                    if(a.HasCoffeeMachine)
+                    {
+                        features.Add(new Feature
+                        {
+                            FeatureType = "Coffee Machine"
+                        });
+                    }
+                    if(a.HasTv)
+                    {
+                        features.Add(new Feature
+                        {
+                            FeatureType = "TV"
+                        });
+                    }
+                    if(a.HasWaterHeater)
+                    {
+                        features.Add(new Feature
+                        {
+                            FeatureType = "Water Heater"
+                        });
+                    }
+                    if(a.HasAirConditioner)
+                    {
+                        features.Add(new Feature
+                        {
+                            FeatureType = "Air Conditioner"
+                        });
+                    }
+                    if(a.HasSpeakerAndMic)
+                    {
+                        features.Add(new Feature
+                        {
+                            FeatureType = "Speaker And Mic"
+                        });
+                    }
+                }
+                else if(ph.PlaceId != 0)
+                {
+                    if (ph.HasCoffeeMachine)
+                    {
+                        features.Add(new Feature
+                        {
+                            FeatureType = "Coffee Machine"
+                        });
+                    }
+                    if (ph.HasTv)
+                    {
+                        features.Add(new Feature
+                        {
+                            FeatureType = "TV"
+                        });
+                    }
+                    if (ph.HasWaterHeater)
+                    {
+                        features.Add(new Feature
+                        {
+                            FeatureType = "Water Heater"
+                        });
+                    }
+                    if (ph.HasAirConditioner)
+                    {
+                        features.Add(new Feature
+                        {
+                            FeatureType = "Air Conditioner"
+                        });
+                    }
+                    if (ph.HasSpeakerAndMic)
+                    {
+                        features.Add(new Feature
+                        {
+                            FeatureType = "Speaker And Mic"
+                        });
+                    }
+                }
+                else if(hb.PlaceId != 0)
+                {
+                    if (hb.HasBbq)
+                    {
+                        features.Add(new Feature
+                        {
+                            FeatureType = "BBQ"
+                        });
+                    }
+                    if (hb.HasHotub)
+                    {
+                        features.Add(new Feature
+                        {
+                            FeatureType = "Hot Tub"
+                        });
+                    }
+                    if (hb.HasTables)
+                    {
+                        features.Add(new Feature
+                        {
+                            FeatureType = "Tables"
+                        });
+                    }
+                    if (hb.HasPool)
+                    {
+                        features.Add(new Feature
+                        {
+                            FeatureType = "Pool"
+                        });
+                    }
+                    if (hb.HasChairs)
+                    {
+                        features.Add(new Feature
+                        {
+                            FeatureType = "Chairs"
+                        });
+                    }
+                }
+                else
+                {
+                    if (h.HasBar)
+                    {
+                        features.Add(new Feature
+                        {
+                            FeatureType = "Bar"
+                        });
+                    }
+                    if (h.HasProjector)
+                    {
+                        features.Add(new Feature
+                        {
+                            FeatureType = "Projector"
+                        });
+                    }
+                    if (h.HasTables)
+                    {
+                        features.Add(new Feature
+                        {
+                            FeatureType = "Tables"
+                        });
+                    }
+                    if (h.HasSpeakerAndMic)
+                    {
+                        features.Add(new Feature
+                        {
+                            FeatureType = "Speaker And Mic"
+                        });
+                    }
+                    if (h.HasChairs)
+                    {
+                        features.Add(new Feature
+                        {
+                            FeatureType = "Chairs"
+                        });
+                    }
+                }
+
+                Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
+                return features; 
+            }
+            catch
+            {
+                Response.StatusCode = (int)System.Net.HttpStatusCode.Conflict;
+                return null;
+            }                     
+        }
+
+
+        [Route("makeorder")]
+        [HttpPost]
+        public Order MakeOrder([FromBody] Order order)
+        {
+
+            User current = HttpContext.Session.GetObject<User>("user");
+            if (current != null)
+            {
+                Order newOrder = new Order()
+                {
+                    UserId = order.UserId,
+                    PlaceId = order.PlaceId,
+                    Price = order.Price,
+                    Total = order.Total,
+                    EventDate = order.EventDate,
+                    AmountOfPeople = order.AmountOfPeople,
+                    StartTime = order.StartTime,
+                    EndTime = order.EndTime,
+                    TotalHours = order.TotalHours
+                };
+
+                try
+                {
+                    Order o = context.MakeOrder(newOrder);
+                    if (o != null)
+                    {
+                        Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
+                        return o;
+                    }
+                    Response.StatusCode = (int)System.Net.HttpStatusCode.Conflict;
+                    return null;
+                }
+                catch
+                {
+                    Response.StatusCode = (int)System.Net.HttpStatusCode.Conflict;
+                }
+                return null;
+            }
+            else
+            {
+                Response.StatusCode = (int)System.Net.HttpStatusCode.Forbidden;
+                return null;
+            }
+        }
+        [Route("getorders")]
+        [HttpGet]
+        public string GetOrders([FromQuery] int userID)
+        {
+            try
+            {
+                List<Order> orders = context.GetOrders(userID);
+
+                JsonSerializerSettings options = new JsonSerializerSettings
+                {
+                    PreserveReferencesHandling = PreserveReferencesHandling.All
+                };
+
+                string json = JsonConvert.SerializeObject(orders, options);
+
+                Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
+                return json;
+            }
+            catch
+            {
+                Response.StatusCode = (int)System.Net.HttpStatusCode.InternalServerError;
+                return null;
+            }
+        }
+
+        [Route("updateprofileinfo")]
+        [HttpGet]
+        public IActionResult UpdateProfile([FromQuery] string firstName, [FromQuery] string lastName, [FromQuery] string phoneNum, [FromQuery] string password)
+        {
+            User loggedInUser = HttpContext.Session.GetObject<User>("user");
+
+            if (loggedInUser != null)
+            {
+                User user = context.Users.FirstOrDefault(u => u.Id == loggedInUser.Id);
+                if (user == null) return Forbid();
+
+                if (firstName != null) user.FirstName = firstName;
+                if (lastName != null) user.LastName = lastName;
+                if (phoneNum != null) user.PhoneNumber = phoneNum;
+                if (password != null) user.Pass = password;
+                context.SaveChanges();
+
+                return Ok();
+            }
+
+            return Forbid();
+        }
+
+        [Route("getestates")]
+        [HttpGet]
+        public string GetEstates([FromQuery] int userID)
+        {
+            try
+            {
+                List<Place> places = context.GetEstates(userID);
+
+                JsonSerializerSettings options = new JsonSerializerSettings
+                {
+                    PreserveReferencesHandling = PreserveReferencesHandling.All
+                };
+
+                string json = JsonConvert.SerializeObject(places, options);
+
+                Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
+                return json;
+            }
+            catch
+            {
+                Response.StatusCode = (int)System.Net.HttpStatusCode.InternalServerError;
+                return null;
+            }
+        }
+
+        [Route("updateplaceinfo")]
+        [HttpGet]
+        public IActionResult UpdatePlace([FromQuery] int totalOccupancy, [FromQuery] string summary, [FromQuery] string placeAddress, [FromQuery] string apartment, [FromQuery] string city, [FromQuery] string zip, [FromQuery] string country, [FromQuery] int price, [FromQuery] int placeId)
+        {
+            User loggedInUser = HttpContext.Session.GetObject<User>("user");
+
+            if (loggedInUser != null)
+            {
+                Place place = context.Places.FirstOrDefault(p => p.Id == placeId);
+                if (place == null) return Forbid();
+
+                if (totalOccupancy != null) place.TotalOccupancy = totalOccupancy;
+                if (summary != null) place.Summary = summary;
+                if (placeAddress != null) place.PlaceAddress = placeAddress;
+                if (apartment != null) place.Apartment = apartment;
+                if (city != null) place.City = city;
+                if (zip != null) place.Zip = zip;
+                if (country != null) place.Country = country;
+                if (price != null) place.Price = price;
+                context.SaveChanges();
+
+                return Ok();
+            }
+
+            return Forbid();
+        }
+    }
 }
