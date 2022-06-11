@@ -707,5 +707,60 @@ namespace EventyServer.Controllers
 
             return Forbid();
         }
+
+        [Route("deleteplace")]
+        [HttpGet]
+        public IActionResult DeletePlace([FromQuery] int placeId)
+        {
+            User loggedInUser = HttpContext.Session.GetObject<User>("user");
+
+            if (loggedInUser != null)
+            {
+                Place place = context.Places.Include(p => p.Orders).FirstOrDefault(p => p.Id == placeId);              
+                if(place.Orders.Count == 0)
+                {
+                    context.Remove(place);
+                    switch (place.PlaceType)
+                    {
+                        case 1:
+                            Apartment a = context.Apartments.FirstOrDefault(p => p.Id == placeId);
+                            context.Apartments.Remove(a); break;
+                        case 2:
+                            Hall h = context.Halls.FirstOrDefault(p => p.Id == placeId);
+                            context.Halls.Remove(h); break;
+                        case 3:
+                            PrivateHouse p = context.PrivateHouses.FirstOrDefault(p => p.Id == placeId);
+                            context.PrivateHouses.Remove(p); break;
+                        case 4:
+                            HouseBackyard b = context.HouseBackyards.FirstOrDefault(p => p.Id == placeId);
+                            context.HouseBackyards.Remove(b); break;
+                    }
+                    context.SaveChanges();
+
+                    return Ok();
+                }              
+            }
+
+            return Forbid();
+        }
+
+        [Route("cancelevent")]
+        [HttpGet]
+        public IActionResult CancelEvent([FromQuery] int orderId)
+        {
+            User loggedInUser = HttpContext.Session.GetObject<User>("user");
+
+            if (loggedInUser != null)
+            {
+                Order order = context.Orders.FirstOrDefault(o => o.Id == orderId);
+                
+                context.Remove(order);
+                context.SaveChanges();
+
+                return Ok();
+            }
+
+            return Forbid();
+        }
     }
 }
